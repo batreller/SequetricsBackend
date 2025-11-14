@@ -18,7 +18,7 @@ class AirportRunwaySummarizer(SummarizerStrategy):
     # todo maybe add LLM
 
     async def summarize(self, text: str) -> str:
-        keywords = ["полоса", "проблема", "повреждение", "препятствие", "ремонт"]
+        keywords = ["stripe", "problem", "damage", "obstacle", "repair"]
 
         sentences = text.split(".")
         important_sentences = [

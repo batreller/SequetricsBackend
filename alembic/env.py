@@ -28,12 +28,11 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from app.config import settings
 from app.database import Base
-from app.models import User, VoiceRecord  # Импортируем все модели
+from app.models import User, VoiceRecord
 
 # this is the Alembic Config object
 config = context.config
 
-# Устанавливаем URL из .env
 config.set_main_option('sqlalchemy.url', settings.DATABASE_URL)
 
 # Interpret the config file for Python logging

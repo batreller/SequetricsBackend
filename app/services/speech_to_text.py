@@ -1,7 +1,11 @@
 from abc import ABC, abstractmethod
+from functools import partial
+
 import whisper
 import torch
 from app.config import settings
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 
 
 class STTStrategy(ABC):
@@ -12,13 +16,20 @@ class STTStrategy(ABC):
 
 class WhisperSTT(STTStrategy):
     def __init__(self):
-        # todo use logger
         device = "cuda" if settings.USE_GPU and torch.cuda.is_available() else "cpu"
         print(f"Loading Whisper model '{settings.WHISPER_MODEL}' on device: {device}")
         self.model = whisper.load_model(settings.WHISPER_MODEL, device=device)
+        self.executor = ThreadPoolExecutor(max_workers=2)
 
     async def transcribe(self, audio_path: str) -> str:
-        result = self.model.transcribe(audio_path, language="ru")
+        loop = asyncio.get_event_loop()
+
+        func = partial(self.model.transcribe, audio_path, language="en")
+
+        result = await loop.run_in_executor(
+            self.executor,
+            func
+        )
         return result["text"]
 
 

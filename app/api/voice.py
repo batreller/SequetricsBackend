@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
 from datetime import datetime
 from app.database import get_db
 from app.auth import verify_token
@@ -13,7 +14,6 @@ from app.services.audio_storage import AudioStorageService
 router = APIRouter()
 security = HTTPBearer()
 
-# Инициализируем сервисы
 stt_service = SpeechToTextService()
 summarizer_service = TextSummarizerService()
 storage_service = AudioStorageService()
@@ -23,14 +23,16 @@ storage_service = AudioStorageService()
 async def voice_to_text(
         audio: UploadFile = File(...),
         credentials: HTTPAuthorizationCredentials = Depends(security),
-        db: Session = Depends(get_db)
+        db: AsyncSession = Depends(get_db)
 ):
     email = verify_token(credentials.credentials)
-    user = db.query(User).filter(User.email == email).first()
+    result = await db.execute(select(User).filter(User.email == email))
+    user = result.scalar_one_or_none()
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
 
     audio_path = await storage_service.save_audio(audio)
+    print('audio_path', audio_path)
 
     try:
         transcript = await stt_service.transcribe(audio_path)
@@ -43,8 +45,8 @@ async def voice_to_text(
             created_at=datetime.utcnow()
         )
         db.add(voice_record)
-        db.commit()
-        db.refresh(voice_record)
+        await db.commit()
+        await db.refresh(voice_record)
 
         return TranscriptResponse(
             id=voice_record.id,
