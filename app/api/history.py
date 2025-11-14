@@ -21,7 +21,7 @@ async def get_history(
     email = verify_token(credentials.credentials)
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        raise HTTPException(status_code=401, detail="Пользователь не найден")
+        raise HTTPException(status_code=401, detail="User not found")
 
     records = db.query(VoiceRecord) \
         .filter(VoiceRecord.user_id == user.id) \

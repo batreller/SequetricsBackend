@@ -28,7 +28,7 @@ async def voice_to_text(
     email = verify_token(credentials.credentials)
     user = db.query(User).filter(User.email == email).first()
     if not user:
-        raise HTTPException(status_code=401, detail="Пользователь не найден")
+        raise HTTPException(status_code=401, detail="User not found")
 
     audio_path = await storage_service.save_audio(audio)
 
@@ -55,4 +55,4 @@ async def voice_to_text(
 
     except Exception as e:
         storage_service.delete_audio(audio_path)
-        raise HTTPException(status_code=500, detail=f"Ошибка обработки: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Processing error: {str(e)}")
