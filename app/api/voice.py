@@ -32,7 +32,6 @@ async def voice_to_text(
         raise HTTPException(status_code=401, detail="User not found")
 
     audio_path = await storage_service.save_audio(audio)
-    print('audio_path', audio_path)
 
     try:
         transcript = await stt_service.transcribe(audio_path)

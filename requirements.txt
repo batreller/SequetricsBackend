@@ -14,6 +14,8 @@ aiofiles==23.2.1
 asyncpg==0.30.0
 pydantic[email]==2.12.4
 ffmpeg-python==0.2.0
+transformers==4.57.1
+hf_xet==1.2.0
 --index-url https://download.pytorch.org/whl/cu121
 torch
 torchvision
